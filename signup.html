@@ -60,7 +60,7 @@
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
 
     import { getDatabase, set, ref } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
-    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword , sendEmailVerification} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
   
@@ -89,21 +89,29 @@ let Emaillnp = document.getElementById('email');
 let Passlnp = document.getElementById('password');
 let Fnamelnp = document.getElementById("username");
 
-    let Registeruser = evt =>{
+let Registeruser = evt => {
         evt.preventDefault(); 
-        createUserWithEmailAndPassword(auth,Emaillnp.value,Passlnp.value)
-            .then((credentials)=>{
-                set(ref(db,'UsersAuthList/'+ credentials.user.uid),{
-                    fullname:Fnamelnp.value
-                })
+        createUserWithEmailAndPassword(auth, Emaillnp.value, Passlnp.value)
+            .then((credentials) => {
+                set(ref(db, 'UsersAuthList/' + credentials.user.uid), {
+                    fullname: Fnamelnp.value
+                }).then(() => {
+                    sendEmailVerification(auth.currentUser)
+                        .then(() => {
+                            // Email verification sent!
+                            alert("Verification email sent. Please check your email inbox.");
+                        }).catch((error) => {
+                            console.error(error);
+                            alert("Error sending verification email: " + error.message);
+                        });
+                });
             })
-            .catch((error)=>{
+            .catch((error) => {
                 alert(error.message);
-                console.log(error.code);
-                console.log(error.message);
-            })
+                console.error(error);
+            });
     }
-    myform.addEventListener('submit',Registeruser);
+    myform.addEventListener('submit', Registeruser);
         
   </script>
   
